@@ -1,16 +1,6 @@
 # Simple Stock Exchange
 
-A lightweight stock exchange simulation built with Flask. This project implements a basic order book system where users can trade a sample stock through a web interface.
-
-## Features
-
-- **Simple Authentication**: Users can login or register with just a username and password
-- **Initial Portfolio**: New users receive 10,000 currency units and 1,000 SAMPLE stocks
-- **Real-time Order Book**: View current buy (bid) and sell (ask) orders
-- **Order Matching**: Automatic matching of compatible buy and sell orders
-- **Portfolio Tracking**: Monitor your balance and stock holdings
-- **Clean Web Interface**: Easy-to-use interface for placing and viewing orders
-
+A lightweight stock exchange simulation built with Flask. This project implements a basic automatic order book system.
 ## How It Works
 
 The system maintains an order book with two sides:
@@ -61,7 +51,7 @@ When orders are placed, the system automatically tries to match compatible order
 
 ## Technical Details
 
-- Built with Flask (Python web framework)
+- Built with Flask
 - Uses in-memory storage for user data and orders
 - Implements a simple order matching algorithm
 - Responsive web interface using HTML and JavaScript
