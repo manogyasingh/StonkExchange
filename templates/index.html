@@ -3,6 +3,7 @@
 <head>
     <title>Stock Exchange</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="header">
@@ -18,7 +19,15 @@
         <div class="stocks-grid">
             {% for symbol in stocks %}
             <div class="stock-item">
-                <strong>{{ symbol }}:</strong> <span id="stock-{{ symbol }}">{{ user.stocks[symbol] }}</span> units
+                <strong><a href="{{ url_for('stock_dashboard', symbol=symbol) }}">{{ symbol }}</a></strong>
+                <div>Owned: <span id="stock-{{ symbol }}">{{ user.stocks[symbol] }}</span></div>
+                <div>Total Minted: {{ total_minted[symbol] }}</div>
+                <canvas id="chart-{{ symbol }}" width="200" height="100"></canvas>
+                {% if price_history[symbol] %}
+                <div>Last Price: ${{ "%.2f"|format(price_history[symbol][-1]['price']) }}</div>
+                {% else %}
+                <div>No trades yet</div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -58,6 +67,7 @@
 
     <script>
         const orderbooks = JSON.parse('{{ orderbook|tojson|safe }}');
+        const priceHistory = {{ price_history|tojson|safe }};
     </script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>

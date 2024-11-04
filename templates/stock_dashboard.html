@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ symbol }} Dashboard - Stock Exchange</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ symbol }} Dashboard</h1>
+        <div>
+            <button onclick="location.href='{{ url_for('index') }}'" class="logout">Back to Portfolio</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Stock Metrics</h2>
+        <p>Total Minted: {{ total_minted[symbol] }}</p>
+        {% if price_history[symbol] %}
+        <p>Last Price: ${{ "%.2f"|format(price_history[symbol][-1]['price']) }}</p>
+        <p>Market Cap: ${{ "%.2f"|format(market_cap) }}</p>
+        <canvas id="priceChart" width="600" height="400"></canvas>
+        {% else %}
+        <p>No trades yet</p>
+        {% endif %}
+    </div>
+
+    <script>
+        {% if price_history[symbol] %}
+        const priceHistory = {{ price_history[symbol]|tojson|safe }};
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const data = {
+            labels: priceHistory.map(entry => new Date(entry.time)),
+            datasets: [{
+                label: 'Price',
+                data: priceHistory.map(entry => entry.price),
+                borderColor: '#1a73e8',
+                fill: false,
+                tension: 0.1
+            }]
+        };
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    x: { 
+                        type: 'time',
+                        time: { unit: 'minute' }
+                    },
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
