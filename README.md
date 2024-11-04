@@ -48,17 +48,7 @@ When orders are placed, the system automatically tries to match compatible order
    - Buy orders are shown on the left
    - Sell orders are shown on the right
    - Each order displays price, quantity, and username
-
-## Technical Details
-
-- Built with Flask
-- Uses in-memory storage for user data and orders
-- Implements a simple order matching algorithm
-- Responsive web interface using HTML and JavaScript
-- Real-time updates using AJAX calls
-
-## Notes
-
-- There are 10 stocks in StonkExchange ('TECH', 'CARS', 'FOOD', 'BANK', 'RETAIL', 'ENERGY', 'HEALTH', 'MEDIA', 'TELCO', 'REAL') You can change this by editing the stocks list `app.py`
-- Data is stored in memory and will be reset when the server restarts
-- The system uses a simple authentication system (not suitable for production)
+5. **Admin Panel**
+   - Admin can issue stocks
+6. Market Cap and Graphs
+   - Market Capitalisation and a graph of past deal prices is maintained.
