@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Data storage paths
-DATA_DIR = 'data'
+DATA_DIR = '../data'
 USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 STOCKS_FILE = os.path.join(DATA_DIR, 'stocks.json')
 ORDERBOOK_FILE = os.path.join(DATA_DIR, 'orderbook.json')

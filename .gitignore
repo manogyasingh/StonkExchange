@@ -4,3 +4,4 @@ devtools_cache/*
 *.log
 data/
 __pycache__
+*.json
