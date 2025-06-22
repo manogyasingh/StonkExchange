@@ -4,6 +4,7 @@ import secrets
 from datetime import datetime
 import os
 import json
+import heapq
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -96,42 +97,64 @@ def match_orders(symbol: str):
         
     while (len(orderbook[symbol]['bids']) > 0 and 
            len(orderbook[symbol]['asks']) > 0 and 
-           orderbook[symbol]['bids'][0][0] >= orderbook[symbol]['asks'][0][0]):
+           -orderbook[symbol]['bids'][0][0] >= orderbook[symbol]['asks'][0][0]):
         
-        bid = orderbook[symbol]['bids'][0]
-        ask = orderbook[symbol]['asks'][0]
-        price = ask[0]
+        bid = heapq.heappop(orderbook[symbol]['bids'])
+        ask = heapq.heappop(orderbook[symbol]['asks'])
+        
+        # Convert bid price back to positive
+        bid_price = -bid[0]
+        ask_price = ask[0]
+        price = ask_price
         quantity = min(bid[1], ask[1])
+        
+        buyer = bid[2]
+        seller = ask[2]
         
         trade_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if symbol not in price_history:
             price_history[symbol] = []
         price_history[symbol].append({'time': trade_time, 'price': price})
         
-        buyer = bid[2]
-        users[buyer]['balance'] -= price * quantity
+        # Execute the trade - funds/stocks are already reserved
+        # Return any price difference to buyer (if they bid higher than ask price)
+        price_difference = bid_price - ask_price
+        users[buyer]['balance'] += price_difference * quantity
         users[buyer]['stocks'][symbol] = users[buyer]['stocks'].get(symbol, 0) + quantity
         
-        seller = ask[2]
         users[seller]['balance'] += price * quantity
-        users[seller]['stocks'][symbol] -= quantity
+        # Seller's stocks were already deducted when placing the ask
         
-        bid[1] -= quantity
-        ask[1] -= quantity
+        # Handle remaining quantities
+        remaining_bid_quantity = bid[1] - quantity
+        remaining_ask_quantity = ask[1] - quantity
         
-        if bid[1] == 0:
-            orderbook[symbol]['bids'].pop(0)
-        if ask[1] == 0:
-            orderbook[symbol]['asks'].pop(0)
+        # Return unused reserves and push back remaining quantities
+        if remaining_bid_quantity > 0:
+            heapq.heappush(orderbook[symbol]['bids'], [-bid_price, remaining_bid_quantity, buyer])
+        
+        if remaining_ask_quantity > 0:
+            heapq.heappush(orderbook[symbol]['asks'], [ask_price, remaining_ask_quantity, seller])
         
         save_data()
 
 @app.route('/')
 @login_required
 def index():
+    # Convert heap format to display format for template
+    display_orderbook = {}
+    for symbol, orders in orderbook.items():
+        display_orderbook[symbol] = {
+            'bids': [[-bid[0], bid[1], bid[2]] for bid in orders['bids']],
+            'asks': [[ask[0], ask[1], ask[2]] for ask in orders['asks']]
+        }
+        # Sort for display purposes
+        display_orderbook[symbol]['bids'].sort(key=lambda x: (-x[0], x[2]))
+        display_orderbook[symbol]['asks'].sort(key=lambda x: (x[0], x[2]))
+    
     return render_template('index.html', 
                          user=users[session['username']], 
-                         orderbook=orderbook,
+                         orderbook=display_orderbook,
                          stocks=STOCKS,
                          total_minted=total_minted,
                          price_history=price_history)
@@ -199,22 +222,33 @@ def place_order():
                 return jsonify({'status': 'error', 'message': 'Insufficient funds'})
             if symbol not in orderbook:
                 orderbook[symbol] = {'bids': [], 'asks': []}
-            orderbook[symbol]['bids'].append([price, quantity, username])
-            orderbook[symbol]['bids'].sort(key=lambda x: (-x[0], x[2]))
+            # Reserve the funds when placing a bid
+            users[username]['balance'] -= price * quantity
+            heapq.heappush(orderbook[symbol]['bids'], [-price, quantity, username])
         else:
             if users[username]['stocks'].get(symbol, 0) < quantity:
                 return jsonify({'status': 'error', 'message': 'Insufficient stocks'})
             if symbol not in orderbook:
                 orderbook[symbol] = {'bids': [], 'asks': []}
-            orderbook[symbol]['asks'].append([price, quantity, username])
-            orderbook[symbol]['asks'].sort(key=lambda x: (x[0], x[2]))
+            # Reserve the stocks when placing an ask
+            users[username]['stocks'][symbol] -= quantity
+            heapq.heappush(orderbook[symbol]['asks'], [price, quantity, username])
         
         match_orders(symbol)
         save_data()
         
+        # Convert heap format back for response
+        display_orderbook = {
+            'bids': [[-bid[0], bid[1], bid[2]] for bid in orderbook[symbol]['bids']],
+            'asks': [[ask[0], ask[1], ask[2]] for ask in orderbook[symbol]['asks']]
+        }
+        # Sort for display purposes
+        display_orderbook['bids'].sort(key=lambda x: (-x[0], x[2]))
+        display_orderbook['asks'].sort(key=lambda x: (x[0], x[2]))
+        
         return jsonify({
             'status': 'success',
-            'orderbook': orderbook[symbol],
+            'orderbook': display_orderbook,
             'user': users[username],
             'price_history': price_history.get(symbol, [])
         })

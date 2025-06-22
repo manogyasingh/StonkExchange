@@ -9,7 +9,7 @@ import json
 import sys
 
 class StonkExchangeClient:
-    def __init__(self, base_url="http://localhost:5001", username=None):
+    def __init__(self, base_url="http://localhost:5002", username=None):
         self.base_url = base_url
         self.session = requests.Session()
         self.username = username
@@ -75,7 +75,7 @@ def setup_test_environment():
     try:
         # Login as admin
         login_response = admin_session.post(
-            "http://localhost:5001/login",
+            "http://localhost:5002/login",
             data={"username": "admin", "password": "adminpass"},
             allow_redirects=False,
             timeout=10
@@ -87,7 +87,7 @@ def setup_test_environment():
         # Add stocks
         for stock in stocks:
             admin_session.post(
-                "http://localhost:5001/admin",
+                "http://localhost:5002/admin",
                 data={
                     "action": "add_stock",
                     "stock_symbol": stock
@@ -101,7 +101,7 @@ def setup_test_environment():
 def run_client(client_id, duration_seconds, orders_per_second):
     """Run a single client for specified duration at target rate"""
     username = f"user_{client_id}"
-    client = StonkExchangeClient("http://localhost:5001", username)
+    client = StonkExchangeClient("http://localhost:5002", username)
     
     # Login
     if not client.login():
@@ -182,7 +182,7 @@ def gradual_load_test(max_n):
     
     # Check server
     try:
-        response = requests.get("http://localhost:5001/login", timeout=5)
+        response = requests.get("http://localhost:5002/login", timeout=5)
         if response.status_code != 200:
             print("❌ Server not responding!")
             return
@@ -213,7 +213,7 @@ def gradual_load_test(max_n):
         print(f"\n📊 Phase {i}/{len(phases)}: {clients} clients, {orders_per_sec} orders/sec")
         
         success_rate, avg_response_time, actual_rate = run_load_test_phase(
-            clients, orders_per_sec, phase_duration=5
+            clients, orders_per_sec, phase_duration=1
         )
         
         metrics.add_result(clients, actual_rate, success_rate, avg_response_time)
