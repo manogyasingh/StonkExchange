@@ -1,0 +1,20 @@
+{
+  "total_requests": 25,
+  "successful_logins": 5,
+  "failed_logins": 0,
+  "login_success_rate": 100.0,
+  "successful_orders": 8,
+  "failed_orders": 7,
+  "order_success_rate": 53.333333333333336,
+  "dashboard_requests": 5,
+  "avg_response_time_ms": 34.21792030334473,
+  "median_response_time_ms": 5.1403045654296875,
+  "min_response_time_ms": 1.8787384033203125,
+  "max_response_time_ms": 165.79151153564453,
+  "p95_response_time_ms": 163.2873296737671,
+  "p99_response_time_ms": 165.79151153564453,
+  "requests_per_second": 18.410333941365295,
+  "test_duration_seconds": 1.357933,
+  "error_count": 7,
+  "timestamp": "2025-06-22T23:20:15.471100"
+}

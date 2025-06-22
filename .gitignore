@@ -1,3 +1,6 @@
 venv/*
 .env
 devtools_cache/*
+*.log
+data/
+__pycache__

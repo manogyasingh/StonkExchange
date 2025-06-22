@@ -5,18 +5,9 @@ from datetime import datetime
 import os
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
-
-# Rate limiting
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
 
 # Data storage paths
 DATA_DIR = 'data'
@@ -146,7 +137,6 @@ def index():
                          price_history=price_history)
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -186,7 +176,6 @@ def logout():
 
 @app.route('/place_order', methods=['POST'])
 @login_required
-@limiter.limit("30 per minute")
 def place_order():
     username = session['username']
     symbol = request.form['symbol'].upper()
