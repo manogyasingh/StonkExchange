@@ -42,8 +42,49 @@ A very simple stock market simulation.
 The system maintains an order book with two sides:
 - **Bids**: Buy orders sorted by price (highest first)
 - **Asks**: Sell orders sorted by price (lowest first)
+And then we match them.
 
-And then we match them. In the words of a certain cartoon character:  
-*"Take what they give you, give away what you have to, and the difference is yours."*
+## How to Run
 
-## How to run
+### Prerequisites
+```bash
+pip install -r requirements.txt
+```
+
+### Start the Server
+```bash
+python run_server.py
+```
+
+The server will start on `http://localhost:5001`
+
+### Login
+- **Regular users**: Enter any username/password (account created automatically)
+- **Admin**: Username: `admin`, Password: `adminpass`
+
+## Load Testing
+
+### Benchmark
+To run the benchmark client:
+```bash
+python src/benchmark_client.py
+```
+You'll be prompted to enter the maximum number of clients and orders/sec to test.
+
+### Understanding Benchmark Results
+The benchmark tests multiple phases with increasing load:
+- **Clients**: Number of concurrent users placing orders
+- **Rate/sec**: Orders per second across all clients
+- **Success%**: Percentage of orders successfully processed
+- **Avg ms**: Average response time in milliseconds
+
+Example output:
+```
+Phase    Clients  Rate/sec   Success%   Avg ms    
+------------------------------------------------------------
+1        4        4.0        50.0       5.1       
+2        8        8.0        47.5       5.1       
+3        12       12.0       56.7       5.6       
+4        16       16.0       53.8       7.4       
+5        20       20.0       54.0       7.0       
+```
