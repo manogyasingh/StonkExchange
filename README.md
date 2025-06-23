@@ -70,21 +70,3 @@ To run the benchmark client:
 python src/benchmark_client.py
 ```
 You'll be prompted to enter the maximum number of clients and orders/sec to test.
-
-### Understanding Benchmark Results
-The benchmark tests multiple phases with increasing load:
-- **Clients**: Number of concurrent users placing orders
-- **Rate/sec**: Orders per second across all clients
-- **Success%**: Percentage of orders successfully processed
-- **Avg ms**: Average response time in milliseconds
-
-Example output:
-```
-Phase    Clients  Rate/sec   Success%   Avg ms    
-------------------------------------------------------------
-1        4        4.0        50.0       5.1       
-2        8        8.0        47.5       5.1       
-3        12       12.0       56.7       5.6       
-4        16       16.0       53.8       7.4       
-5        20       20.0       54.0       7.0       
-```
